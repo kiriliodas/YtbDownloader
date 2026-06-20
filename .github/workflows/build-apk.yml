@@ -1,0 +1,91 @@
+# Builds a debug APK on every push and publishes it.
+# - On any push to any branch: APK is uploaded as a downloadable artifact (Actions tab).
+# - On a tag like `v1.0`: a GitHub Release is created with the APK attached.
+#
+# You never need Android Studio, JDK, or the Gradle wrapper locally — everything
+# is installed on the runner. The wrapper jar is generated here because it is a
+# binary that isn't committed to the repo.
+name: Build APK
+
+on:
+  push:
+    branches: ["**"]      # every branch, so you can test changes quickly
+    tags: ["v*"]          # pushing a v* tag creates a release
+  workflow_dispatch: {}   # manual "Run workflow" button in the Actions tab
+
+# Cancel a previous run on the same branch if you push again mid-build.
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # The GitHub runner already has the Android SDK installed and licensed.
+      # setup-gradle installs Gradle 8.9 and caches dependencies for fast rebuilds.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.9"
+
+      # Generate the Gradle wrapper (gradlew + gradle-wrapper.jar) so the build
+      # is fully reproducible and matches gradle-wrapper.properties.
+      - name: Generate Gradle wrapper
+        run: gradle wrapper --gradle-version 8.9 --distribution-type bin
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Rename APK
+        run: |
+          mkdir -p out
+          cp app/build/outputs/apk/debug/*.apk out/YtdlClean-debug.apk
+          echo "Built: $(ls -la out/)"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: YtdlClean-debug-apk
+          path: out/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Publish release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # required to create a GitHub Release
+
+    steps:
+      - name: Download built APK
+        uses: actions/download-artifact@v4
+        with:
+          name: YtdlClean-debug-apk
+          path: out
+
+      - name: Rename APK with version tag
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          mv out/YtdlClean-debug.apk "out/YtdlClean-${VERSION}-debug.apk"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false

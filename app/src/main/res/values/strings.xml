@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">YtdlClean</string>
+
+    <!-- Nav -->
+    <string name="nav_home">Download</string>
+    <string name="nav_downloads">Library</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Home -->
+    <string name="hint_url">Paste a YouTube / video URL</string>
+    <string name="action_analyze">Analyze</string>
+    <string name="action_paste">Paste</string>
+
+    <!-- Format sheet -->
+    <string name="sheet_pick_format">Pick quality</string>
+    <string name="group_best">Auto (recommended)</string>
+    <string name="group_video_audio">Video + Audio</string>
+    <string name="group_video_only">Video only</string>
+    <string name="group_audio_only">Audio only</string>
+    <string name="action_download_video">Download video</string>
+    <string name="action_download_audio">Extract audio</string>
+
+    <!-- Downloads -->
+    <string name="empty_library">No downloads yet.\nPaste a link to get started.</string>
+    <string name="action_open">Open</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_clear">Clear finished</string>
+
+    <!-- Service -->
+    <string name="notif_channel_name">Downloads</string>
+    <string name="notif_channel_desc">Shows progress for active downloads</string>
+    <string name="notif_downloading">Downloading</string>
+    <string name="notif_complete">Download complete</string>
+
+    <!-- Settings -->
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_dark_mode">Dark mode</string>
+    <string name="settings_default">Defaults</string>
+    <string name="settings_default_quality">Default video quality</string>
+    <string name="settings_about">About</string>
+    <string name="settings_disclaimer">This app is for personal use (e.g. your own uploads, Creative Commons content). Respect YouTube ToS and copyright laws in your region.</string>
+</resources>
