@@ -8,6 +8,8 @@ composeBom = "2024.06.00"
 navigationCompose = "2.7.7"
 coroutines = "1.8.1"
 coil = "2.6.0"
+# Font Awesome icons for Compose (pure ImageVector data — no runtime dependency)
+composeIcons = "1.1.1"
 # youtubedl-android bundles yt-dlp + a python runtime for Android.
 # Published to Maven Central. Latest: https://central.sonatype.com/artifact/io.github.junkfood02.youtubedl-android/library
 # NOTE: the Maven groupId is io.github.junkfood02.youtubedl-android, but the
