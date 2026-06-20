@@ -87,6 +87,9 @@ dependencies {
     // Image loading (thumbnails)
     implementation(libs.coil.compose)
 
+    // Font Awesome modern icons
+    implementation(libs.compose.icons.font.awesome)
+
     // yt-dlp backend (download engine + ffmpeg for muxing/audio extraction)
     implementation(libs.youtubedl.library)
     implementation(libs.youtubedl.ffmpeg)

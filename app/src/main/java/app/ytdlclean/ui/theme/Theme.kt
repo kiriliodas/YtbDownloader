@@ -28,6 +28,7 @@ private val LightColors = lightColorScheme(
     onSurface = md_onSurface,
     surfaceVariant = md_surfaceVariant,
     outline = md_outline,
+    outlineVariant = md_outlineVariant,
 )
 
 private val DarkColors = darkColorScheme(
@@ -63,8 +64,6 @@ fun YtdlTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         androidx.compose.runtime.SideEffect {
-            // Guard against the view's context not being an Activity (can happen on
-            // some OEM embedding scenarios) — a bad cast here would crash on launch.
             val ctx = view.context
             if (ctx is android.app.Activity) {
                 val window = ctx.window

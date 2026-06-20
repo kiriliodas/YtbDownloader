@@ -2,6 +2,7 @@
 
 package app.ytdlclean.ui.downloads
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,15 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Cancel
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Movie
-import androidx.compose.material.icons.outlined.MusicNote
-import androidx.compose.material.icons.outlined.OpenInNew
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -36,15 +28,26 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Download
+import compose.icons.fontawesomeicons.solid.ExternalLinkAlt
+import compose.icons.fontawesomeicons.solid.Film
+import compose.icons.fontawesomeicons.solid.Music
+import compose.icons.fontawesomeicons.solid.Redo
+import compose.icons.fontawesomeicons.solid.Times
+import compose.icons.fontawesomeicons.solid.Trash
 import app.ytdlclean.domain.DownloadStatus
 import app.ytdlclean.domain.DownloadTask
 import app.ytdlclean.domain.DownloadType
@@ -53,27 +56,45 @@ import coil.compose.AsyncImage
 @Composable
 fun DownloadsScreen(viewModel: DownloadsViewModel) {
     val tasks by viewModel.tasks.collectAsStateWithLifecycle()
-    // Hoisted out of the row callback: LocalContext.current is @Composable and
-    // cannot be read inside the non-composable () -> Unit lambdas below.
     val context = LocalContext.current
 
-    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    "Library",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 12.dp),
+    Column(Modifier.fillMaxSize()) {
+        // ── Gradient header ──────────────────────────────────────────────────
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+                        )
+                    )
                 )
-                Text(
-                    "Your downloads",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (viewModel.hasFinished) {
-                TextButton(onClick = viewModel::clearFinished) { Text("Clear") }
+                .padding(horizontal = 20.dp, vertical = 28.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Library",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                    )
+                    Text(
+                        "Your downloads",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.85f),
+                    )
+                }
+                if (viewModel.hasFinished) {
+                    TextButton(
+                        onClick = viewModel::clearFinished,
+                        colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                            contentColor = Color.White,
+                        ),
+                    ) { Text("Clear") }
+                }
             }
         }
 
@@ -82,7 +103,7 @@ fun DownloadsScreen(viewModel: DownloadsViewModel) {
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 12.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 items(tasks, key = { it.id }) { task ->
@@ -111,13 +132,15 @@ private fun DownloadRow(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .size(width = 56.dp, height = 40.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (task.thumbnailUrl != null) {
@@ -129,9 +152,10 @@ private fun DownloadRow(
                         )
                     } else {
                         Icon(
-                            if (task.type == DownloadType.AUDIO) Icons.Outlined.MusicNote else Icons.Outlined.Movie,
+                            if (task.type == DownloadType.AUDIO) FontAwesomeIcons.Solid.Music else FontAwesomeIcons.Solid.Film,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
@@ -152,7 +176,7 @@ private fun DownloadRow(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(4.dp))
                 RowActions(task, onCancel, onRetry, onRemove, onOpen)
             }
 
@@ -160,7 +184,7 @@ private fun DownloadRow(
                 Spacer(Modifier.height(10.dp))
                 LinearProgressIndicator(
                     progress = { if (task.status == DownloadStatus.QUEUED) 0f else task.progress },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp)),
                 )
             }
         }
@@ -177,16 +201,16 @@ private fun RowActions(
 ) {
     when (task.status) {
         DownloadStatus.QUEUED, DownloadStatus.DOWNLOADING -> Row {
-            IconButton(onClick = onCancel) { Icon(Icons.Outlined.Cancel, "Cancel") }
-            IconButton(onClick = onRemove) { Icon(Icons.Outlined.DeleteOutline, "Remove") }
+            IconButton(onClick = onCancel) { Icon(FontAwesomeIcons.Solid.Times, "Cancel", modifier = Modifier.size(18.dp)) }
+            IconButton(onClick = onRemove) { Icon(FontAwesomeIcons.Solid.Trash, "Remove", modifier = Modifier.size(18.dp)) }
         }
         DownloadStatus.FAILED, DownloadStatus.CANCELED -> Row {
-            IconButton(onClick = onRetry) { Icon(Icons.Outlined.Refresh, "Retry") }
-            IconButton(onClick = onRemove) { Icon(Icons.Outlined.DeleteOutline, "Remove") }
+            IconButton(onClick = onRetry) { Icon(FontAwesomeIcons.Solid.Redo, "Retry", modifier = Modifier.size(18.dp)) }
+            IconButton(onClick = onRemove) { Icon(FontAwesomeIcons.Solid.Trash, "Remove", modifier = Modifier.size(18.dp)) }
         }
         DownloadStatus.COMPLETED -> Row {
-            IconButton(onClick = onOpen) { Icon(Icons.Outlined.OpenInNew, "Open") }
-            IconButton(onClick = onRemove) { Icon(Icons.Outlined.DeleteOutline, "Remove") }
+            IconButton(onClick = onOpen) { Icon(FontAwesomeIcons.Solid.ExternalLinkAlt, "Open", modifier = Modifier.size(18.dp)) }
+            IconButton(onClick = onRemove) { Icon(FontAwesomeIcons.Solid.Trash, "Remove", modifier = Modifier.size(18.dp)) }
         }
     }
 }
@@ -196,14 +220,14 @@ private fun EmptyState() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                Icons.Outlined.Movie,
+                FontAwesomeIcons.Solid.Download,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.outline,
+                tint = MaterialTheme.colorScheme.outlineVariant,
             )
-            Spacer(Modifier.height(12.dp))
-            Text("No downloads yet", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(16.dp))
+            Text("No downloads yet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(6.dp))
             Text(
                 "Paste a link on the Download tab to get started.",
                 style = MaterialTheme.typography.bodyMedium,
