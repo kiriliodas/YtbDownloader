@@ -21,8 +21,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -54,6 +52,9 @@ fun AppNavHost(initialSharedUrl: String?) {
 
     val navController = rememberNavController()
     val backStackEntry = navController.currentBackStackEntryAsState().value
+    // Shared dependency container — resolved once, in composable scope.
+    val container: DownloadManager =
+        AppContainer.get(LocalContext.current.applicationContext as Application)
 
     val items = listOf(
         NavItem(Routes.HOME, "Download", Icons.Outlined.Download),
@@ -91,7 +92,11 @@ fun AppNavHost(initialSharedUrl: String?) {
                 .padding(padding),
         ) {
             composable(Routes.HOME) {
-                val vm: HomeViewModel = viewModel(factory = appFactory { HomeViewModel(it) })
+                // Each factory is built inline so initializer's reified type is the
+                // concrete ViewModel class (HomeViewModel), not the base ViewModel.
+                val vm: HomeViewModel = viewModel(
+                    factory = viewModelFactory { initializer { HomeViewModel(container) } }
+                )
                 HomeScreen(
                     viewModel = vm,
                     initialSharedUrl = initialSharedUrl,
@@ -104,22 +109,19 @@ fun AppNavHost(initialSharedUrl: String?) {
                 )
             }
             composable(Routes.DOWNLOADS) {
-                val vm: DownloadsViewModel = viewModel(factory = appFactory { DownloadsViewModel(it) })
+                val vm: DownloadsViewModel = viewModel(
+                    factory = viewModelFactory { initializer { DownloadsViewModel(container) } }
+                )
                 DownloadsScreen(viewModel = vm)
             }
             composable(Routes.SETTINGS) {
-                val vm: SettingsViewModel = viewModel(factory = appFactory { SettingsViewModel(it) })
+                val vm: SettingsViewModel = viewModel(
+                    factory = viewModelFactory { initializer { SettingsViewModel(container) } }
+                )
                 SettingsScreen(viewModel = vm)
             }
         }
     }
-}
-
-/** A [ViewModelProvider.Factory] that hands the shared [DownloadManager] to the view model. */
-@Composable
-private fun appFactory(create: (DownloadManager) -> ViewModel): ViewModelProvider.Factory {
-    val container = AppContainer.get(LocalContext.current.applicationContext as Application)
-    return viewModelFactory { initializer { create(container) } }
 }
 
 @Composable
